@@ -2,7 +2,8 @@
 
 import os
 import sys
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from . import timeManipulation
 
 
@@ -52,14 +53,21 @@ def main():
         arg_info['dir'] = './'
     if not arg_info['time']:
         arg_info['time'] = 3600
-
-    for file in os.listdir(arg_info['dir']):
-        try:
-            mod_time = os.path.getmtime(file)
-            mod_time = datetime.fromtimestamp(mod_time)
-        except OSError:
-            print("something went wrong in getting modified time")
-
+    while True:
+        # Infinite loop, checking for old files
+        for file in os.listdir(arg_info['dir']):
+            try:
+                # Check what time the file was last modified
+                mod_time = datetime.fromtimestamp(os.path.getmtime(file))
+                # if the current time is after the time the file was modified with the buffer specified
+                if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])):
+                    # Delete the file
+                    os.remove(file)
+            except PermissionError:
+                print("need higher permissions")
+            except OSError:
+                print("something went wrong in getting modified time")
+        time.sleep(1)
 
 
 if __name__ == '__main__':
