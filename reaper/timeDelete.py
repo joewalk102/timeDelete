@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import platform
 from datetime import datetime, timedelta
 import timeManipulation
 
@@ -46,6 +47,19 @@ def __check_args__():
     return {'dir': directory, 'time': time_delay}
 
 
+def get_mod_date(path_to_file):
+    """
+    Try to get the date that a file was created, falling back to when it was
+    last modified if that isn't possible.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == 'Windows':
+        return datetime.fromtimestamp(os.path.getmtime(path_to_file))
+    else:
+        stat = os.stat(path_to_file)
+        return datetime.fromtimestamp(stat.st_mtime)
+
+
 def main():
     arg_info = __check_args__()
     # Set defaults if no arguments were provided
@@ -53,23 +67,31 @@ def main():
         arg_info['dir'] = './'
     if not arg_info['time']:
         arg_info['time'] = 3600
-    while True:
-        # Infinite loop, checking for old files
-        for file in os.listdir(arg_info['dir']):
-            try:
-                # Check what time the file was last modified
-                mod_time = datetime.fromtimestamp(os.path.getmtime(file))
-                # if the current time is after the time the file was modified with the buffer specified
-                if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])) and 'timeDelete.py' not in file\
-                        and '__init__.py' not in file and 'timeManipulation.py' not in file:
-                    # Delete the file
-                    os.remove(file)
-            except PermissionError:
-                print("need higher permissions")
-            except OSError:
-                print("something went wrong in getting modified time")
-                exit()
-        time.sleep(1)
+    death_note = []
+    try:
+        while True:
+            # Infinite loop, checking for old files
+            for file in os.listdir(arg_info['dir']):
+                full_path = os.path.join(arg_info['dir'], file)
+                mod_time = get_mod_date(full_path)
+                try:
+                    # if the current time is after the time the file was modified with the buffer specified
+                    if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])) and 'timeDelete.py' not in file\
+                            and '__init__.py' not in file and 'timeManipulation.py' not in file:
+                        # Delete the file
+                        os.remove(full_path)
+                        death_note.append(file)
+                        print("Deleted: {0}".format(full_path))
+                except PermissionError:
+                    print("need higher permissions")
+                    exit()
+
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping Monitor of {0}".format(arg_info['dir']))
+        print("List of files deleted:")
+        for file in death_note:
+            print("  {0}".format(file))
 
 
 if __name__ == '__main__':
