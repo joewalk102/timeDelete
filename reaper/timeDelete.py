@@ -60,7 +60,8 @@ def main():
                 # Check what time the file was last modified
                 mod_time = datetime.fromtimestamp(os.path.getmtime(file))
                 # if the current time is after the time the file was modified with the buffer specified
-                if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])):
+                if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])) and 'timeDelete.py' not in file\
+                        and '__init__.py' not in file and 'timeManipulation.py' not in file:
                     # Delete the file
                     os.remove(file)
             except PermissionError:
