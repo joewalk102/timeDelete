@@ -4,45 +4,45 @@ import os
 import sys
 import time
 from datetime import datetime, timedelta
-from . import timeManipulation
+import timeManipulation
 
 
 def __check_args__():
     directory = None
     time_delay = None
     if len(sys.argv) > 1:
-        count = 1
         try:
-            while sys.argv[count]:
+            for i in range(0, len(sys.argv)):
                 # Checking to see if the first character is a -, indicating argument type will follow
-                if sys.argv[count][0] == '-':
+                if sys.argv[i][0] == '-':
                     # If the - was the first character, getting the second character for instruction type
-                    if sys.argv[count][1] == 'd':
+                    if sys.argv[i][1] == 'd':
                         # -d sets the directory to monitor
-                        directory = sys.argv[count + 1]
+                        directory = sys.argv[i + 1]
                         if not os.path.isdir(directory):
                             raise NotADirectoryError
-                    elif sys.argv[count][1] == 't':
+                    elif sys.argv[i][1] == 't':
                         # -t sets the time between last edit and deletion
-                        time_delay = timeManipulation.string_to_seconds(sys.argv[count + 1])
-                    elif 'help' in sys.argv[count]:
-                        print("""Monitors a directory and deletes files older than a specified age from last edit.
+                        time_delay = timeManipulation.string_to_seconds(sys.argv[i + 1])
+                    elif 'help' in sys.argv[i]:
+                        print("""Monitors a directory and deletes files older than a specified age from last edit.\n
     -d\t\t Directory to monitor for old files
     -t\t\t Time between last edit to the file and file deletion format: '32d' or '4h' or '5m'
     \t\t    Note: currently only supports Days (d) Hours (h) or Minutes (m)
-    --help\t Displays this help text""")
-                count += 2
+    --help\t Displays this help text\n""")
+                        break
         except IndexError:
             print("Arguemnt error. Try checking any arguments passed and run again.")
+            print("Type --help for more information")
         except NotADirectoryError:
             print("{dir} is not a valid directory. Please try again.".format(dir=directory))
+            print("Type --help for more information")
         except NotImplementedError:
             print("Decimals and time other than second / minute / hour / day are not currently supported")
+            print("Type --help for more information")
         except TypeError:
             print("Something went wrong. String was not passed to evaluation method")
-        finally:
             print("Type --help for more information")
-            exit()
     return {'dir': directory, 'time': time_delay}
 
 
@@ -68,6 +68,7 @@ def main():
                 print("need higher permissions")
             except OSError:
                 print("something went wrong in getting modified time")
+                exit()
         time.sleep(1)
 
 
