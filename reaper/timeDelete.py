@@ -76,8 +76,8 @@ def main():
                 mod_time = get_mod_date(full_path)
                 try:
                     # if the current time is after the time the file was modified with the buffer specified
-                    if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])) and 'timeDelete.py' not in file\
-                            and '__init__.py' not in file and 'timeManipulation.py' not in file:
+                    if datetime.now() > (mod_time + timedelta(seconds=arg_info['time'])) and 'timeDelete.py' not\
+                            in file and '__init__.py' not in file and 'timeManipulation.py' not in file:
                         # Delete the file
                         os.remove(full_path)
                         death_note.append(file)
